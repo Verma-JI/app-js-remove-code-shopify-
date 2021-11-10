@@ -1,0 +1,28 @@
+
+ {% comment %} Leave url_to_remove as 0 to remove all apps, or set to a number to remove a specific app. {% endcomment %}
+  {% assign url_to_remove = 0 %}
+  {% assign lines = content_for_header | newline_to_br | split: '<br />' %}
+  
+  {% for line in lines %}
+    {% if line contains 'var urls' %}
+      {% if url_to_remove == 1 %}
+        {% comment %}Remove all apps{% endcomment %}
+        {% capture new_line %}
+        {% endcapture %}
+        {% assign empty_array = new_line | append: "var urls = [];" %}
+        {% assign content_for_header = content_for_header | replace: line, empty_array %}
+        <!-- Removed all apps. -->
+      {% else %}
+        {% assign url_string = line | remove: "var urls = [" | remove: "];" | strip %}
+        {% assign url_array = url_string | split: ',' | uniq %}
+        {% comment %}Just remove app at index 'url_to_remove' {% endcomment %}
+          {% for url in url_array %}
+            {% if url contains 'name_exist' %}
+              {% assign content_for_header = content_for_header | replace: url, '""' %}
+              <!-- Removed app no. {{ url_to_remove }} of {{ url_array.size }}: {{ url }} -->
+        {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{{ content_for_header }}
